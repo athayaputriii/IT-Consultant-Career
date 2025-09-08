@@ -1,0 +1,17 @@
+# Python-specific files to ignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment files
+venv/
+.venv/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Sensitive files
+# This is where your bot's token is stored if you use a .env file.
+.env
