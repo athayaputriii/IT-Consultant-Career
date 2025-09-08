@@ -13,5 +13,4 @@ venv/
 Thumbs.db
 
 # Sensitive files
-# This is where your bot's token is stored if you use a .env file.
 .env
