@@ -156,3 +156,9 @@ responses = {
         ]
     }
 }
+
+response_connectors = [
+    "\n\nAlso, regarding your question about {intent_name}:\n",
+    "\n\nAs for {intent_name}:\n",
+    "\n\nTo address your point on {intent_name}:\n"
+]
