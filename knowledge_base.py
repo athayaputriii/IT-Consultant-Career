@@ -1,40 +1,36 @@
-intent_patterns = {
-    "career_path": [
-        r"\b(how to become|career (path|pathway|plan|progression|roadmap)|become a|road.*map|path to)\b",
-        r"\b(what does a (.*) do|day in the life of a (.*)|role of a (.*)|responsibilities of a (.*))\b",
-        r"\b(which path|choose between|(.*) or (.*) career|difference between (.*) and (.*))\b",
-        r"\b(future.*career|emerging.*roles|career.*202[4-9]|career.*next.*years|in-demand.*jobs)\b",
-        r"\b(how to transition|switch.*career|career.*change|from (.*) to (.*))\b",
-        r"\b(entry.*point|get.*started|begin.*career|first.*step|how to start)\b"
-    ],
-    "technology": [
-        r"\b(technolog(y|ies)|tools|stack|framework|library|libraries|programming language|platform)\b",
-        r"\b(what (tech|tools|framework|language).*use|which (tech|tool|framework).*for|recommend.*tech)\b",
-        r"\b(learn.*tech|new.*technolog|emerging.*tech|trending.*technology|future.*technology)\b",
-        r"\b(compare.*tech|(.*) vs (.*)|difference between (.*) and (.*)|pros and cons of (.*))\b",
-        r"\b(tech.*stack|full.*stack|frontend.*stack|backend.*stack|devops.*tool|data.*tool)\b",
-        r"\b(best.*tool|best.*framework|best.*language|popular.*tech|most.*used.*tech)\b"
-    ],
-    "salary": [
-        r"\b(salary|pay|compensation|how much (does|do) (.*) earn|earn(ing|s)?)\b",
-        r"\b(negotiate (offer|salary)|ask for more money|salary (range|expectation)|raise)\b"
-    ],
-    "certification": [
-        r"\b(certifications?|certs?|certificate|exam(s)?|(should i )?get certified|professional certificate)\b",
-        r"\b(AWS Certified|Azure (.*)certific|Google (.*)certific|CompTIA|CISSP|CEH|CCNA)\b"
-    ],
-    "interview": [
-        r"\b(interview (prep|questions|tips)|technical interview|how to (prepare|ace) an interview)\b",
-        r"\b(common questions|(.*) interview questions|behavioral questions|whiteboard)\b"
-    ],
-    "greeting": [
-        r"\b(hi|hello|hey|greetings|good (morning|afternoon|evening))\b",
-        r"\b(what('s| is) up|how('s| is) it going)\b"
-    ],
-    "thanks": [
-        r"\b(thank(s| you)|thanks a lot|appreciate it|thx|ty)\b"
-    ]
+intent_keywords = {
+    "career_path": {
+        "career": 3, "path": 2, "pathway": 2, "roadmap": 2, "become a": 3, 
+        "transition": 3, "switch": 3, "how to": 1, "what does": 1, "get started": 2, 
+        "first step": 2, "future": 2, "day in the life": 2, "role of": 2,
+        "responsibilities": 2, "choose between": 2, "from": 1, "to": 1
+    },
+    "technology": {
+        "technology": 3, "technologies": 3, "tools": 2, "stack": 2, "framework": 2, 
+        "library": 2, "language": 2, "platform": 2, "python": 1, "react": 1, "aws": 1, 
+        "kubernetes": 1, "compare": 2, "vs": 2, "difference between": 2, "recommend": 1
+    },
+    "salary": {
+        "salary": 3, "salaries": 3, "pay": 3, "compensation": 3, "how much": 2, 
+        "earn": 2, "earnings": 2, "negotiate": 3, "raise": 2, "range": 1
+    },
+    "certification": {
+        "certification": 3, "certifications": 3, "certs": 2, "certificate": 2, 
+        "exam": 2, "certified": 2, "aws certified": 3, "azure": 2, "comptia": 2
+    },
+    "interview": {
+        "interview": 3, "interviews": 3, "prep": 2, "questions": 2, "technical": 2,
+        "prepare": 2, "behavioral": 2, "whiteboard": 2
+    },
+    "greeting": {
+        "hi": 1, "hello": 1, "hey": 1, "greetings": 1, "good morning": 1,
+        "good afternoon": 1, "what's up": 1
+    },
+    "thanks": {
+        "thank": 2, "thanks": 2, "appreciate": 2, "thx": 1, "ty": 1
+    }
 }
+
 
 entity_patterns = {
     "role": [
