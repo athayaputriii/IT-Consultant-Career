@@ -10,3 +10,9 @@ venv/
 
 # Sensitive files
 .env
+
+# Archive files
+archieves/
+
+# log files
+logs/

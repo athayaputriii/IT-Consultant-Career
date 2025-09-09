@@ -1,164 +1,173 @@
+"""
+knowledge_base.py
+
+This file contains all the data and "knowledge" for the IT Career Consultant Bot.
+By separating the data from the logic, we can easily update and expand the bot's
+capabilities without changing the core application code in bot.py.
+VERSION 2.6 - Added Goodbye Intent
+"""
+
+# 1. Intent Keywords: Words or phrases that map to a user's intention.
 intent_keywords = {
     "career_path": {
-        "career": 3, "path": 2, "pathway": 2, "roadmap": 2, "become a": 3, 
-        "transition": 3, "switch": 3, "how to": 1, "what does": 1, "get started": 2, 
-        "first step": 2, "future": 2, "day in the life": 2, "role of": 2,
-        "responsibilities": 2, "choose between": 2, "from": 1, "to": 1
+        "career": 2, "path": 2, "pathway": 2, "roadmap": 2, "become a": 3,
+        "how to be a": 3, "what does a": 2, "skills for": 3, "what is the skill to become": 3,
+        "skill needed for": 3, "skills needed for": 3, "what skills": 2,
+        "role of": 2, "responsibilities": 2, "get into": 2
     },
-    "technology": {
-        "technology": 3, "technologies": 3, "tools": 2, "stack": 2, "framework": 2, 
-        "library": 2, "language": 2, "platform": 2, "python": 1, "react": 1, "aws": 1, 
-        "kubernetes": 1, "compare": 2, "vs": 2, "difference between": 2, "recommend": 1
+    "role_suggestion": {
+        "what can i be": 4, "suitable role": 4, "career for me": 4, "prospect career": 3,
+        "what job can i get with": 4, "work prospects": 3, "thinking about": 2, "thinking of": 2,
+        # Increased weight of these keywords to meet the confidence threshold
+        "i know": 2, "i have skill": 2, "proficient in": 2, "proficient with": 2,
+        "good with": 3, "good at": 3, "could use": 3,
+        "my skills are": 2, "potential job": 2, "based on": 1, "i have": 1
     },
-    "salary": {
-        "salary": 3, "salaries": 3, "pay": 3, "compensation": 3, "how much": 2, 
-        "earn": 2, "earnings": 2, "negotiate": 3, "raise": 2, "range": 1
-    },
-    "certification": {
-        "certification": 3, "certifications": 3, "certs": 2, "certificate": 2, 
-        "exam": 2, "certified": 2, "aws certified": 3, "azure": 2, "comptia": 2
-    },
-    "interview": {
-        "interview": 3, "interviews": 3, "prep": 2, "questions": 2, "technical": 2,
-        "prepare": 2, "behavioral": 2, "whiteboard": 2
+    "consultation_start": {
+        "i want to consult": 3, "need your help": 3, "can you help me": 3,
+        "i need advice": 2, "can i ask something": 2, "help me": 1,
+        "sure": 1, "yes": 1, "ok": 1, "okay": 1
     },
     "greeting": {
-        "hi": 1, "hello": 1, "hey": 1, "greetings": 1, "good morning": 1,
-        "good afternoon": 1, "what's up": 1
+        "hi": 1, "hello": 1, "hey": 1, "greetings": 1, "good morning": 1, "morning": 1,
+        "good afternoon": 1, "what's up": 1, "good evening": 1
     },
     "thanks": {
-        "thank": 2, "thanks": 2, "appreciate": 2, "thx": 1, "ty": 1
+        "thank": 2, "thanks": 2, "appreciate": 2, "thx": 1, "ty": 1, "jia yo": 1,
+        "you got it": 1, "that's what i need to study": 2
+    },
+    "goodbye": {
+        "bye": 2, "goodbye": 2, "good night": 2, "night": 1, "see you": 1, "later": 1
     }
 }
 
-
+# 2. Entity Patterns: Regular expressions to extract specific pieces of information.
 entity_patterns = {
     "role": [
-        r"\b(backend|frontend|full.?stack|software|web|mobile|android|ios|flutter) developer\b",
-        r"\b(game|embedded|firmware|kernel|compiler|QA|test|automation) developer\b",
-        r"\b(devops|site reliability|SRE|cloud|data|machine learning|AI|ML|big data) engineer\b",
-        r"\b(security|cyber(security)?|network|systems|reliability|automation) engineer\b",
-        r"\b(solutions|infrastructure|platform|database|ETL|analytics) engineer\b",
-        r"\b(data scientist|data analyst|data engineer|ML engineer|AI engineer|business intelligence|BI developer)\b",
-        r"\b(IT support|system administrator|sysadmin|network administrator|cloud administrator)\b",
-        r"\b(security engineer|cybersecurity analyst|penetration tester|ethical hacker|security consultant)\b",
-        r"\b(project manager|product manager|tech lead|engineering manager|CTO|chief technology officer)\b",
-        r"\b(software architect|solutions architect|system architect|technical architect)\b",
-        r"\b(blockchain developer|smart contract developer|Web3 developer|solidity developer)\b",
-        r"\b(AR developer|VR developer|metaverse developer|computer vision engineer|NLP engineer)\b"
+        # Development Roles
+        r"\b(backend|frontend|full.?stack|software|web) developer\b",
+        r"\b(mobile developer|android developer|ios developer)\b",
+        r"\b(game developer|ar/vr developer)\b",
+        r"\b(embedded systems engineer|blockchain developer|robotics engineer)\b",
+        # Data Roles
+        r"\b(data scientist|data analyst|ml engineer|ai engineer|bi developer|ai researcher)\b",
+        # Operations & Infrastructure Roles
+        r"\b(devops?|site reliability|sre|cloud|network|hardware) engineer\b",
+        r"\b(database administrator|dba|system administrator|sysadmin)\b",
+        # Security Roles
+        r"\b(security engineer|cybersecurity analyst|penetration tester|pen tester|ethical hacker|information security analyst)\b",
+        # Quality & Testing Roles
+        r"\b(qa engineer|test automation engineer)\b",
+        # Management & Strategy Roles
+        r"\b(solutions architect|software architect|cloud architect|it consultant|it auditor)\b",
+        r"\b(product manager|project manager|business analyst)\b",
+        # User & Content Roles
+        r"\b(ui/ux designer|technical writer)\b",
+        # Support Roles
+        r"\b(it support specialist)\b"
     ],
     "technology": [
-        r"\b(python|java|javascript|js|typescript|ts|go|golang|rust|c#|c\+\+|php|ruby|swift|kotlin|dart)\b",
-        r"\b(react|angular|vue|svelte|ember|backbone|jquery|next\.?js|nuxt\.?js|gatsby|remix)\b",
-        r"\b(node\.?js|express|nestjs|fastify|koa|django|flask|fastapi|spring|quarkus|micronaut)\b",
-        r"\b(ruby on rails|laravel|symfony|asp\.net|core\.net|phoenix|gin|fiber|actix|rocket)\b",
-        r"\b(react native|flutter|ionic|native script|xamarin|swiftui|jetpack compose|kotlin multiplatform)\b",
-        r"\b(AWS|Amazon Web Services|Azure|Google Cloud|GCP|IBM Cloud|Oracle Cloud|DigitalOcean|Linode)\b",
-        r"\b(heroku|netlify|vercel|firebase|supabase|cloudflare|render|fly\.io|digitalocean|linode)\b",
-        r"\b(kubernetes|k8s|docker|containerd|podman|terraform|pulumi|ansible|chef|puppet|saltstack)\b",
-        r"\b(jenkins|gitlab|github actions|circleci|travisci|argo(cd|workflows)|flux|spinnaker)\b",
-        r"\b(prometheus|grafana|elk|elasticsearch|kibana|splunk|datadog|newrelic|jaeger|loki)\b",
-        r"\b(SQL|MySQL|PostgreSQL|SQLite|oracle|sql server|mariaDB|cockroachDB|timescaleDB)\b",
-        r"\b(MongoDB|redis|cassandra|dynamoDB|cosmosDB|firestore|neo4j|arangodb|influxDB|snowflake)\b",
-        r"\b(tensorflow|pytorch|keras|scikit.?learn|opencv|pandas|numpy|jupyter|apache spark|hadoop)\b",
-        r"\b(kafka|rabbitMQ|nats|airflow|prefect|dagster|dbt|tableau|powerbi|looker|metabase)\b",
-        r"\b(blockchain|ethereum|bitcoin|smart contract|web3|ipfs|arweave|graphql|grpc|webRTC)\b"
-    ],
-    "experience_level": [
-        r"\b(intern|internship|apprentice|entry.?level|junior|graduate|fresh graduate|first job)\b",
-        r"\b(mid.?level|mid.?senior|experienced|senior|lead|staff|principal|architect|fellow)\b"
+        # Languages & OS (Special characters removed and handled in a separate pattern below)
+        r"\b(python|java|javascript|js|typescript|ts|go|golang|rust|php|r|sql|swift|kotlin|solidity|bash|ruby|html|css|linux)\b",
+        # Frontend Frameworks
+        r"\b(react|angular|vue|svelte|next\.?js|jquery)\b",
+        # Backend Frameworks (Special characters removed)
+        r"\b(node\.?js|django|flask|fastapi|spring|ruby on rails)\b",
+        # Cloud & DevOps
+        r"\b(aws|azure|google cloud|gcp|docker|kubernetes|k8s|terraform|ansible|jenkins|gitlab|github actions)\b",
+        # Data & ML
+        r"\b(pandas|numpy|scikit-learn|tensorflow|pytorch|keras|tableau|powerbi|power bi|jupyter|apache spark|hadoop)\b",
+        # Databases
+        r"\b(mysql|postgresql|mongodb|redis|oracle|sql server)\b",
+        # Mobile
+        r"\b(react native|flutter|xcode|android studio)\b",
+        # Game Dev & AR/VR
+        r"\b(unity|unreal engine)\b", # C++ removed and handled below
+        # QA & Testing
+        r"\b(selenium|cypress|jest|junit|pytest)\b",
+        # Security Tools
+        r"\b(wireshark|metasploit|nmap|burp suite)\b",
+        # Design & Project Management
+        r"\b(figma|sketch|adobe xd|jira|asana|trello)\b",
+        # FINAL FIX: Removed the trailing word boundary `\b` to match at end of string
+        r"(c\+\+|c\#|\.net)",
     ]
 }
 
-responses = {
-    "greeting": {
-        "default": [
-            "Hello! I'm your IT Career Consultant bot! 🚀",
-            "Hi there! Ready to explore IT career paths?",
-            "Hey! Let's talk about technology careers! 👨‍💻"
-        ]
-    },
-    "thanks": {
-        "default": [
-            "You're welcome! Happy to help with your career journey!",
-            "Anytime! Good luck with your IT career path!",
-            "Glad I could help! Feel free to ask more questions."
-        ]
-    },
-    "career_path": {
-        "backend developer": [
-            "To become a backend developer: Start with a language like Python, Java, or Node.js. Learn about databases (SQL & NoSQL), API design, and server management. Build projects with frameworks like Django, Spring, or Express.js.",
-            "Backend developer path: Master a programming language → Learn databases → Understand APIs → Study system design → Build portfolio projects → Apply for junior positions."
-        ],
-        "frontend developer": [
-            "Frontend developer roadmap: HTML → CSS → JavaScript → React/Vue/Angular → State management → Build tools → Responsive design → Portfolio projects.",
-            "For frontend development: Focus on JavaScript fundamentals, then choose a framework (React is most popular). Learn CSS frameworks like Tailwind and build interactive projects."
-        ],
-        "data scientist": [
-            "Data scientist career: Statistics → Python/R → SQL → Machine Learning → Data visualization → Domain knowledge → Build data projects → Portfolio.",
-            "To become a data scientist: Strong math foundation, programming (Python), machine learning, statistics, and business acumen. Consider a Master's degree for advanced roles."
-        ],
-        "devops engineer": [
-            "DevOps engineer path: Linux → Scripting → Cloud basics → Containers → Kubernetes → CI/CD → Infrastructure as Code → Monitoring → Security.",
-            "DevOps career: Start with Linux administration, learn a scripting language, understand cloud services, master Docker/Kubernetes, then learn automation tools."
-        ],
-        "cloud engineer": [
-            "Cloud engineer roadmap: Linux/Networking → AWS/Azure/GCP fundamentals → Infrastructure as Code → Containers → Security → Certification → Real projects.",
-            "For cloud engineering: Get cloud certified (AWS/Azure), learn Terraform, understand networking, and build projects deploying applications to the cloud."
-        ],
-        "default": [
-            "Great career question! For most IT roles: Learn fundamentals → Build projects → Get certified → Gain experience → Specialize → Keep learning.",
-            "IT career general path: Foundation skills → Specialization → Practical experience → Continuous learning → Networking → Career advancement."
-        ]
-    },
-    "technology": {
-        "python": [
-            "Python is excellent for beginners! Great for web development (Django/Flask), data science (Pandas/NumPy), automation, and AI/ML. High demand in job market.",
-            "Python: Versatile language used in web dev, data science, automation, and AI. Easy to learn with huge community support. Start with Python if you're new to programming."
-        ],
-        "javascript": [
-            "JavaScript is essential for web development. Learn vanilla JS first, then frameworks like React, Vue, or Angular. Also used in backend (Node.js) and mobile (React Native).",
-            "JavaScript: The language of the web. Must-learn for frontend, also powerful for backend with Node.js. High demand across all experience levels."
-        ],
-        "react": [
-            "React is the most popular frontend framework. Learn JavaScript first, then React fundamentals, state management, hooks, and modern React patterns.",
-            "React: Component-based library maintained by Facebook. Great job opportunities. Learn with official documentation and build projects with Next.js."
-        ],
-        "aws": [
-            "AWS is the leading cloud platform. Start with Cloud Practitioner, then Solutions Architect. Learn EC2, S3, Lambda, and infrastructure as code with Terraform.",
-            "AWS skills are in high demand. Learn core services, get certified, and practice with real projects. Essential for DevOps and cloud roles."
-        ],
-        "kubernetes": [
-            "Kubernetes is the container orchestration standard. Learn Docker first, then K8s fundamentals, deployments, services, and Helm charts. High demand in DevOps.",
-            "Kubernetes: Essential for modern cloud infrastructure. Learn container basics, then K8s concepts, and practice with minikube or cloud Kubernetes services."
-        ],
-        "default": [
-            "Technology learning path: Start with fundamentals → Build small projects → Learn advanced concepts → Contribute to open source → Stay updated with trends.",
-            "When choosing technology: Consider job market demand, community support, learning curve, and your career goals. Focus on fundamentals first."
-        ]
-    },
-    "salary": {
-        "default": [
-            "IT salaries vary by role, experience, location, and company. Junior: $50-80K, Mid: $80-120K, Senior: $120-180K+, with higher ranges in tech hubs.",
-            "Salary ranges: Entry-level positions typically start at $50-70K, mid-level $80-120K, senior roles $120-200K+. Specialized roles and FAANG companies pay higher."
-        ]
-    },
-    "certification": {
-        "default": [
-            "Popular certifications: AWS/Azure/GCP cloud certs, CompTIA A+/Network+/Security+, CISSP, PMP, and specialized certs for specific technologies.",
-            "Certifications can help: Cloud certifications (AWS, Azure, GCP), security certs (CISSP, CEH), and vendor-specific certs demonstrate expertise to employers."
-        ]
-    },
-    "interview": {
-        "default": [
-            "Technical interview prep: Practice coding problems (LeetCode), system design, behavioral questions, and know your resume well. Mock interviews help!",
-            "Interview preparation: Study data structures & algorithms, practice whiteboarding, prepare STAR stories for behavioral questions, and research the company."
-        ]
-    }
+# 3. Simple Responses: For straightforward intents that don't need complex logic.
+simple_responses = {
+    "greeting": ["Hi there! I'm here to help as your IT career counselor.", "Hello! I'm your IT career consultant bot. How can I assist you today?"],
+    "consultation_start": ["Of course. I can help you in two main ways: you can tell me a job role to see the required skills, or you can tell me your skills to find matching job roles. What would you like to do?", "I'm ready to help. I can match your prospect role based on your skills, and vice-versa. Just let me know what you need."],
+    "thanks": ["You're welcome! Happy to help with your career journey! Jia yo! 💪", "Anytime! Feel free to ask more questions. Good luck!"],
+    "goodbye": ["Goodbye! Feel free to reach out again anytime.", "Good night! Take care.", "See you later!"]
 }
 
-response_connectors = [
-    "\n\nAlso, regarding your question about {intent_name}:\n",
-    "\n\nAs for {intent_name}:\n",
-    "\n\nTo address your point on {intent_name}:\n"
-]
+# 4. Role-Skill Map: The core "brain" of the bot. (Content is unchanged from the previous version)
+role_skill_map = {
+    # --- Existing Roles (Refined) ---
+    "data_scientist": {"display_name": "Data Scientist", "description": "...", "skills": {"languages": ["python", "r", "sql"], "core_concepts": ["statistics", "machine learning", "data modeling"], "libraries": ["pandas", "numpy", "scikit-learn", "tensorflow"], "tools": ["jupyter", "tableau", "apache spark"]}},
+    "backend_developer": {"display_name": "Backend Developer", "description": "...", "skills": {"languages": ["python", "java", "go", "c#"], "frameworks": ["django", "spring", "node.js", ".net"], "databases": ["sql", "mongodb", "redis"], "concepts": ["api design", "docker", "kubernetes"]}},
+    "frontend_developer": {"display_name": "Frontend Developer", "description": "...", "skills": {"languages": ["html", "css", "javascript", "typescript"], "frameworks": ["react", "vue", "angular"], "concepts": ["responsive design", "state management", "ui/ux principles"], "tools": ["npm", "webpack", "figma"]}},
+    "devops_engineer": {"display_name": "DevOps Engineer", "description": "...", "skills": {"cloud": ["aws", "azure", "gcp"], "iac": ["terraform", "ansible"], "containerization": ["docker", "kubernetes"], "ci/cd": ["jenkins", "gitlab"], "scripting": ["bash", "python", "linux"]}},
+    "cloud_engineer": {"display_name": "Cloud Engineer", "description": "...", "skills": {"platforms": ["aws", "azure", "gcp"], "infrastructure": ["terraform", "networking", "security"], "containers": ["docker", "kubernetes"], "automation": ["python", "bash", "linux"]}},
+    "data_analyst": {"display_name": "Data Analyst", "description": "...", "skills": {"core": ["sql", "excel", "statistics"], "visualization": ["tableau", "powerbi"], "languages": ["python", "r"], "libraries": ["pandas", "numpy"]}},
+    "machine_learning_engineer": {"display_name": "Machine Learning Engineer", "description": "...", "skills": {"languages": ["python", "java", "c++"], "frameworks": ["tensorflow", "pytorch", "scikit-learn"], "big_data": ["apache spark", "kafka"], "infrastructure": ["docker", "kubernetes", "aws", "linux"]}},
+    "full_stack_developer": {
+        "display_name": "Full Stack Developer", "description": "A versatile developer who works on both the frontend (client-side) and backend (server-side) of an application.",
+        "skills": {"frontend": ["html", "css", "javascript", "react", "vue"], "backend": ["node.js", "python", "java", "sql", "mongodb"], "devops": ["git", "docker", "aws", "linux"]}},
+    "mobile_developer": {
+        "display_name": "Mobile Developer", "description": "Specializes in creating applications for mobile devices like smartphones and tablets, for either Android or iOS.",
+        "skills": {"platforms": ["android (kotlin/java)", "ios (swift)"], "cross_platform": ["react native", "flutter"], "tools": ["xcode", "android studio", "git"], "concepts": ["ui/ux principles", "api integration"]}},
+    "game_developer": {
+        "display_name": "Game Developer", "description": "Designs, programs, and tests video games for computers, consoles, or mobile devices.",
+        "skills": {"engines": ["unity", "unreal engine"], "languages": ["c#", "c++"], "concepts": ["3d math", "game physics", "ai for games"], "tools": ["blender", "git", "linux"]}},
+    "embedded_systems_engineer": {
+        "display_name": "Embedded Systems Engineer", "description": "Works with hardware and software for devices that are not traditional computers, such as IoT devices, wearables, and automotive systems.",
+        "skills": {"languages": ["c", "c++", "python"], "hardware": ["microcontrollers (arduino, raspberry pi)", "circuit design"], "concepts": ["real-time operating systems (rtos)", "low-level programming", "linux"]}},
+    "blockchain_developer": {
+        "display_name": "Blockchain Developer", "description": "Develops decentralized applications (dApps) and smart contracts on blockchain platforms.",
+        "skills": {"languages": ["solidity", "rust", "javascript"], "platforms": ["ethereum", "solana"], "concepts": ["smart contracts", "cryptography", "web3"], "tools": ["hardhat", "truffle", "linux"]}},
+    "database_administrator": {
+        "display_name": "Database Administrator (DBA)", "description": "Manages and maintains an organization's databases, ensuring data integrity, performance, and security.",
+        "skills": {"databases": ["mysql", "postgresql", "sql server", "oracle"], "languages": ["sql"], "concepts": ["database design", "backup and recovery", "performance tuning"], "cloud": ["aws rds", "azure sql"], "os": ["linux"]}},
+    "qa_engineer": {
+        "display_name": "QA Engineer / Test Automation", "description": "Ensures software quality by designing and executing tests, both manual and automated, to find and report bugs.",
+        "skills": {"automation_tools": ["selenium", "cypress", "playwright"], "languages": ["python", "java", "javascript"], "frameworks": ["pytest", "junit", "jest"], "concepts": ["test planning", "bug tracking", "linux"]}},
+    "site_reliability_engineer": {
+        "display_name": "Site Reliability Engineer (SRE)", "description": "A software engineer focused on reliability, scalability, and performance of production systems.",
+        "skills": {"automation": ["python", "go"], "infrastructure": ["kubernetes", "terraform", "aws", "gcp", "linux"], "monitoring": ["prometheus", "grafana", "datadog"], "concepts": ["slos/slis", "incident response"]}},
+    "it_support_specialist": {
+        "display_name": "IT Support Specialist", "description": "Provides technical assistance and troubleshooting for hardware, software, and network issues within an organization.",
+        "skills": {"os": ["windows", "macos", "linux"], "hardware": ["pc assembly", "troubleshooting"], "networking": ["tcp/ip", "dns", "dhcp"], "software": ["active directory", "office 3d"]}},
+    "system_administrator": {
+        "display_name": "System Administrator", "description": "Manages and maintains an organization's IT infrastructure, including servers, networks, and software.",
+        "skills": {"os": ["linux (red hat, ubuntu)", "windows server"], "scripting": ["bash", "powershell"], "virtualization": ["vmware", "hyper-v"], "networking": ["dns", "dhcp", "firewalls"]}},
+    "network_engineer": {
+        "display_name": "Network Engineer", "description": "Designs, implements, and manages an organization's computer networks.",
+        "skills": {"protocols": ["tcp/ip", "bgp", "ospf"], "hardware": ["cisco", "juniper (routers, switches)"], "concepts": ["firewalls", "vpn", "sd-wan"], "certifications": ["ccna", "comptia network+"], "os": ["linux"]}},
+    "security_engineer": {
+        "display_name": "Security Engineer", "description": "Designs and builds systems to protect an organization's computer networks and systems from cyber threats.",
+        "skills": {"concepts": ["network security", "cryptography", "iam"], "tools": ["firewalls", "siem", "ids/ips"], "cloud": ["aws security", "azure security"], "scripting": ["python", "bash", "linux"]}},
+    "cybersecurity_analyst": {
+        "display_name": "Cybersecurity Analyst", "description": "Monitors networks for security breaches, investigates incidents, and implements security measures.",
+        "skills": {"tools": ["siem (splunk, qradar)", "wireshark", "nmap", "linux"], "concepts": ["threat intelligence", "incident response", "vulnerability assessment"], "compliance": ["nist", "iso 2d"]}},
+    "penetration_tester": {
+        "display_name": "Penetration Tester (Ethical Hacker)", "description": "Simulates cyberattacks on systems to identify security vulnerabilities before malicious hackers can.",
+        "skills": {"tools": ["metasploit", "burp suite", "nmap", "kali linux"], "techniques": ["web app testing", "network penetration", "social engineering"], "scripting": ["python", "bash"]}},
+    "solutions_architect": {
+        "display_name": "Solutions Architect", "description": "Designs high-level, comprehensive technology solutions to meet specific business needs, often in a cloud environment.",
+        "skills": {"cloud": ["aws", "azure", "gcp"], "concepts": ["system design", "microservices", "enterprise architecture"], "business": ["stakeholder management", "cost analysis"], "os": ["linux"]}},
+    "product_manager": {
+        "display_name": "Product Manager", "description": "Defines the 'why,' 'what,' and 'when' of a product, focusing on market needs, user experience, and business goals.",
+        "skills": {"methodologies": ["agile", "scrum"], "tools": ["jira", "trello", "figma"], "concepts": ["user stories", "product roadmaps", "market research"], "soft_skills": ["communication", "leadership"]}},
+    "project_manager": {
+        "display_name": "Project Manager", "description": "Responsible for planning, executing, and closing projects, managing resources, budgets, and timelines.",
+        "skills": {"methodologies": ["agile", "scrum", "waterfall"], "tools": ["jira", "asana", "microsoft project"], "concepts": ["risk management", "resource allocation"], "soft_skills": ["organization", "communication"]}},
+    "ui/ux_designer": {
+        "display_name": "UI/UX Designer", "description": "Focuses on the user's experience (UX) and the visual interface (UI) of a product to make it intuitive and appealing.",
+        "skills": {"tools": ["figma", "sketch", "adobe xd"], "concepts": ["wireframing", "prototyping", "user research", "usability testing"], "principles": ["design theory", "typography", "color theory"]}},
+    "technical_writer": {
+        "display_name": "Technical Writer", "description": "Creates clear and concise documentation for complex technical products, such as user manuals, API guides, and tutorials.",
+        "skills": {"tools": ["markdown", "git", "confluence"], "concepts": ["api documentation", "instructional design"], "soft_skills": ["clarity", "attention to detail", "communication"]}}
+}
+
