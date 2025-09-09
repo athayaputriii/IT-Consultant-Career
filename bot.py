@@ -36,9 +36,10 @@ client = discord.Client(intents=intents)
 
 # Compile all regex patterns for efficiency
 COMPILED_INTENT_PATTERNS = {
-    intent: re.compile(r'\b(' + '|'.join(keywords.keys()) + r')\b', re.IGNORECASE)
-    for intent, keywords in knowledge_base.intent_keywords.items()
+    intent: [(re.compile(pattern, re.IGNORECASE), weight) for pattern, weight in patterns]
+    for intent, patterns in knowledge_base.intent_patterns.items()
 }
+
 
 COMPILED_ENTITY_PATTERNS = {
     entity: [re.compile(pattern, re.IGNORECASE) for pattern in patterns]
@@ -68,15 +69,18 @@ logging.info("Skill-to-Role map built successfully.")
 
 # --- CORE LOGIC FUNCTIONS ---
 
+
 def detect_intents(message: str) -> list:
-    """Detects intents based on keywords and scores, returning a sorted list."""
+    """Detects intents based on regex patterns and scores, returning a sorted list."""
     scores = {}
     message_lower = message.lower()
-    for intent, keywords in knowledge_base.intent_keywords.items():
+    
+    for intent, pattern_weights in COMPILED_INTENT_PATTERNS.items():
         score = 0
-        for keyword, weight in keywords.items():
-            if re.search(r'\b' + re.escape(keyword) + r'\b', message_lower):
-                score += weight
+        for pattern, weight in pattern_weights:
+            matches = pattern.findall(message_lower)
+            if matches:
+                score += weight * len(matches)  # Increase score based on number of matches
         if score > 0:
             scores[intent] = score
     

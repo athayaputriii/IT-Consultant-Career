@@ -8,37 +8,115 @@ VERSION 2.6 - Added Goodbye Intent
 """
 
 # 1. Intent Keywords: Words or phrases that map to a user's intention.
-intent_keywords = {
-    "career_path": {
-        "career": 2, "path": 2, "pathway": 2, "roadmap": 2, "become a": 3,
-        "how to be a": 3, "what does a": 2, "skills for": 3, "what is the skill to become": 3,
-        "skill needed for": 3, "skills needed for": 3, "what skills": 2,
-        "role of": 2, "responsibilities": 2, "get into": 2
-    },
-    "role_suggestion": {
-        "what can i be": 4, "suitable role": 4, "career for me": 4, "prospect career": 3,
-        "what job can i get with": 4, "work prospects": 3, "thinking about": 2, "thinking of": 2,
-        # Increased weight of these keywords to meet the confidence threshold
-        "i know": 2, "i have skill": 2, "proficient in": 2, "proficient with": 2,
-        "good with": 3, "good at": 3, "could use": 3,
-        "my skills are": 2, "potential job": 2, "based on": 1, "i have": 1
-    },
-    "consultation_start": {
-        "i want to consult": 3, "need your help": 3, "can you help me": 3,
-        "i need advice": 2, "can i ask something": 2, "help me": 1,
-        "sure": 1, "yes": 1, "ok": 1, "okay": 1
-    },
-    "greeting": {
-        "hi": 1, "hello": 1, "hey": 1, "greetings": 1, "good morning": 1, "morning": 1,
-        "good afternoon": 1, "what's up": 1, "good evening": 1
-    },
-    "thanks": {
-        "thank": 2, "thanks": 2, "appreciate": 2, "thx": 1, "ty": 1, "jia yo": 1,
-        "you got it": 1, "that's what i need to study": 2
-    },
-    "goodbye": {
-        "bye": 2, "goodbye": 2, "good night": 2, "night": 1, "see you": 1, "later": 1
-    }
+# Regex-based intent patterns with weighted capture groups
+intent_patterns = {
+    "career_path": [
+        # Career-related terms with optional plurals and variations
+        (r'(?:\b|^)(careers?|paths?|pathways?|roadmaps?|trajector(?:y|ies)|progression|development|journey|route|learn|need|require|what.*become|how.*become|technolog|tech|stack|tools|knowledge|study|want.*be|to be$)', 2),
+        
+        # Phrases about becoming or transitioning to a role (with lookahead for role mentions)
+        (r'(?:\b|^)(?:(?:how\s+(?:to|do\s+I|can\s+I)\s+)?(?:become|transition\s+(?:to|into)|train\s+(?:as|for)|qualify\s+(?:as|for)|break\s+into|pursue\s+a\s+career\s+as|enter\s+the\s+field\s+of)|'
+         r'become\s+(?:a|an)|path(?:way)?\s+to\s+becoming|steps?\s+to\s+(?:become|be)|requirements?\s+to\s+be)(?:\b|$)', 3),
+        
+        # Questions about roles and responsibilities (more comprehensive)
+        (r'(?:\b|^)(?:what\s+(?:does|do|are|is)\s+(?:a|an)\s+[\w\s]+\s+(?:do|responsible\s+for|entail|involve)|'
+         r'role\s+(?:of|for|description|profile)|responsibilities\s+of|duties\s+of|day-to-day\s+(?:of|for)|'
+         r'get\s+(?:into|started\s+in|involved\s+in)|what\'s\s+involved\s+in|what\'s\s+it\s+like\s+to\s+be)(?:\b|$)', 2),
+        
+        # Skills and requirements questions (more comprehensive)
+        (r'(?:\b|^)(?:skills?\s*(?:required|needed|essential|necessary|for|to\s+become)?|'
+         r'what\s+(?:skills?|qualifications?|requirements?|prerequisites?|education|training|certifications?)'
+         r'(?:\s+(?:are|do I|should I|is)\s+(?:needed|required|necessary))?|'
+         r'(?:technical|hard|soft)\s+skills?|necessary\s+skills?|what\s+(?:does\s+it\s+take|is\s+needed)|'
+         r'learn\s+to\s+become|study\s+to\s+become|training\s+for)(?:\b|$)', 3)
+    ],
+    "role_suggestion": [
+        # Direct questions about career options (more comprehensive)
+        (r'(?:\b|^)(?:what\s+(?:can|should|could)\s+I\s+(?:be(?:come)?|do|pursue)|'
+         r'(?:most\s+)?suitable\s+(?:roles?|careers?|jobs?|positions?)|'
+         r'career\s+(?:options?|for\s+me|suggestions?|advice|recommendations?)|'
+         r'prospect(?:ive|s)?\s+career|which\s+(?:role|job|career|position)\s+(?:fits|suits|matches|is\s+right)|'
+         r'right\s+career\s+for|what\s+should\s+I\s+do\s+with|what\s+job\s+matches|'
+         r'career\s+guidance|career\s+counseling)(?:\b|$|job|what.*do|pursue|with.*skill|become|path|opportunity|ca|profficent|pretty good|familiar|expert|know|knowledge|work|role|roles|field|field of|field in|field with)', 4),
+        
+        # Questions about jobs based on skills/background (more comprehensive)
+        (r'(?:\b|^)(?:what\s+(?:jobs?|roles?|careers?|positions?)\s+(?:can\s+I\s+get|are\s+available|fit|match|pursue)\s+(?:with|for|based\s+on)|'
+         r'work\s+prospects?|job\s+opportunities?|employment\s+options?|'
+         r'career\s+paths?\s+with|compatible\s+careers?|possible\s+careers?|'
+         r'jobs?\s+(?:for|that use|requiring)|roles?\s+(?:for|that use|requiring)|'
+         r'what\s+can\s+I\s+do\s+with|where\s+can\s+I\s+work\s+with)(?:\b|$)', 3),
+        
+        # Expressions of thinking/considering (more comprehensive)
+        (r'(?:\b|^)(?:thinking\s+(?:about|of)|considering|contemplating|exploring|'
+         r'looking\s+(?:into|at)|interested\s+in|curious\s+about|weighing\s+options|'
+         r'evaluating|assessing|thinking\s+of\s+switching|career\s+change|'
+         r'want\s+to\s+move\s+into|transitioning|changing\s+careers?)(?:\b|$)', 2),
+        
+        # Statements about skills and proficiencies (more comprehensive)
+        (r'(?:\b|^)(?:(?:I\s+(?:am|have\s+been)\s+)?(?:proficient|skilled|experienced|good|strong|expert|adept|knowledgeable|competent)\s+(?:in|with|at)|'
+         r'I\s+(?:know|have\s+experience\s+with|have\s+skills?\s+in|am\s+familiar\s+with|work\s+with|use|mastered)|'
+         r'my\s+skills?\s+(?:are|include|consist\s+of)|background\s+in|familiar\s+with|comfortable\s+with|'
+         r'could\s+use|have\s+knowledge\s+of|have\s+expertise\s+in)(?:\b|$)', 3),
+        
+        # Basis for suggestions (more comprehensive)
+        (r'(?:\b|^)(?:based\s+on|given|taking\s+into\s+account|considering|with|'
+         r'according\s+to|in\s+light\s+of|my\s+(?:skills?|experience|background|education|qualifications?|knowledge)|'
+         r'I\s+have|I\'ve\s+worked\s+with|I\s+know|my\s+proficiency\s+in|my\s+expertise\s+in)(?:\b|$)', 1)
+    ],
+    "consultation_start": [
+        # Direct requests for consultation/help
+        (r'\b(I\s+(want|wanna|would like|need)\s+(to\s+)?(consult|talk|discuss|get\s+advice)|'
+         r'need\s+(your\s+)?help|can\s+you\s+help|could\s+you\s+help|'
+         r'would\s+you\s+(help|assist)|looking\s+for\s+guidance|seeking\s+advice)\b', 3),
+        
+        # Indirect requests for advice
+        (r'\b(I\s+need\s+advice|can\s+I\s+ask\s+(something|a question)|'
+         r'have\s+a\s+question|want\s+to\s+pick\s+your\s+brain|'
+         r'could\s+use\s+some\s+guidance|need\s+direction)\b', 2),
+        
+        # Affirmative responses and simple requests
+        (r'\b(help\s+me|please\s+help|assist\s+me|guide\s+me|'
+         r'(yes|yeah|yep|sure|ok(ay)?|absolutely|definitely|of\s+course|certainly)|'
+         r'let\'s\s+(do\s+it|get\s+started|begin))\b', 1)
+    ],
+    "greeting": [
+        # Common greetings
+        (r'\b(hi|hello|hey|howdy|hiya|greetings|salutations|what\'s\s+up|sup|wassup|yo)\b', 1),
+        
+        # Time-based greetings
+        (r'\b(good\s+(morning|afternoon|evening|day)|mornin\'|evenin\'|'
+         r'top\s+of\s+the\s+(morning|day)|happy\s+(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday))\b', 1),
+        
+        # Additional friendly openings
+        (r'\b(how\s+(are\s+you|do\s+you\s+do)|how\'s\s+it\s+going|'
+         r'nice\s+to\s+(see|meet)\s+you|pleasure\s+to\s+meet\s+you|'
+         r'long\s+time\s+no\s+see|hope\s+you\'re\s+doing\s+well)\b', 1)
+    ],
+    "thanks": [
+        # Expressions of gratitude
+        (r'\b(thank\s+(you|u)|thanks|many\s+thanks|appreciate\s+it|much\s+obliged|'
+         r'thx|ty|gracias|merci|danke|arigato|cheers|ta|big\s+ups|props|shoutout|'
+         r'jia\s+yo|you\'re\s+(the\s+best|awesome|amazing|great)|I\s+owe\s+you)\b', 2),
+        
+        # Acknowledgments of helpful information
+        (r'\b(you\s+got\s+it|that\'s\s+(exactly|just)\s+what\s+I\s+(needed|was\s+looking\s+for)|'
+         r'perfect|excellent|great\s+info|very\s+helpful|just\s+what\s+I\s+needed|'
+         r'this\s+helps\s+a\s+lot|exactly\s+what\s+I\s+wanted\s+to\s+know)\b', 1)
+    ],
+    "goodbye": [
+        # Common farewells
+        (r'\b(bye|goodbye|farewell|see\s+ya|see\s+you|catch\s+you\s+later|'
+         r'later|laters|peace\s+(out|)|I\'m\s+out|signing\s+off|gotta\s+go|'
+         r'take\s+care|until\s+next\s+time|talk\s+to\s+you\s+soon)\b', 2),
+        
+        # Night-related farewells
+        (r'\b(good\s+night|night|nighty\s+night|sweet\s+dreams|'
+         r'sleep\s+well|have\s+a\s+good\s+night|rest\s+well)\b', 1),
+        
+        # Work/day ending phrases
+        (r'\b(calling\s+it\s+a\s+day|that\'s\s+all\s+for\s+now|'
+         r'wrapping\s+up|done\s+for\s+the\s+day|time\s+to\s+log\s+off)\b', 1)
+    ]
 }
 
 # 2. Entity Patterns: Regular expressions to extract specific pieces of information.
